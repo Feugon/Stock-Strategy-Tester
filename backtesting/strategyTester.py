@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class StrategyResult:
-    total_return: float
+    total_return_pecent: float
     win_rate: float
     num_trades: int
     return_per_trade: float

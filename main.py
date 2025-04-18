@@ -5,6 +5,7 @@ from data.update import update_data
 from data.fetch import fetch_data
 import pandas as pd
 from models import db
+from backtesting.strategies import buy_and_hold, StrategyResult
 
 
 
@@ -39,6 +40,7 @@ if __name__ == "__main__":
         db.create_all()
     
     df = fetch_data(app,'AAPL')
-    print(df)
+    obj = buy_and_hold(df)
+    print(obj)
 
-    app.run(debug = True)
+    #app.run(debug = True)

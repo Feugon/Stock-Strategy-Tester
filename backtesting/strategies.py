@@ -1,17 +1,19 @@
-from re import S
+import numpy as np
 import pandas as pd
-from strategyTester import StrategyResult
+from backtesting.strategyTester import StrategyResult
 
-def calculate_sharpe(data):
-    """ Calculate the sharpe ratio of a given dataframe"""
-
+def calculate_sharpe(returns):
+    """ Calculate the sharpe ratio of a given return np.array"""
+    return round(np.sqrt(252) * np.mean(returns) / np.std(returns),3)
 
 
 def buy_and_hold(data):
     """ Buy and hold strategy"""
-    buy_price = data.iloc[-1]['close']
-    sell_price = data.iloc[0]['close']
-    profits = sell_price - buy_price
-    win_rate = 100 if profits > 0 else 0 
+    prices = data['close']
+    daily_profits = prices - prices.iloc[0]
+    end_profit = (prices.iloc[-1] - prices.iloc[0]) / prices.iloc[0] * 100
+    end_profit = round(end_profit,3)
+    win_rate = 100 if end_profit > 0 else 0 
+    returns = prices.pct_change()
 
-    return StrategyResult(profits,win_rate,1,profits,)
+    return StrategyResult(end_profit,win_rate,1,end_profit,calculate_sharpe(returns))
