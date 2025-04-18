@@ -1,7 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from configs import ProductionConfig, DevelopmentConfig
-from data_handling import update_data
+from data.update import update_data
+from data.fetch import fetch_data
+import pandas as pd
 from models import db
 
 
@@ -35,5 +37,8 @@ if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
+    
+    df = fetch_data(app,'AAPL')
+    print(df)
 
     app.run(debug = True)

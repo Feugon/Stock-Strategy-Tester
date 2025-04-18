@@ -34,7 +34,7 @@ def convert_dict_to_objects(data, Ticker):
 
 
 
-def update_data(Ticker, app, db, overwrite = False):
+def update_data(ticker, app, db, overwrite = False):
     """ Updates the database with the latest data from the API.
         Args:
             Ticker (str): Ticker symbol
@@ -45,7 +45,7 @@ def update_data(Ticker, app, db, overwrite = False):
             None
     """
     STOCK_API_KEY = os.getenv("STOCK_API_KEY")
-    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={Ticker}&apikey={STOCK_API_KEY}'
+    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={ticker}&apikey={STOCK_API_KEY}'
     r = requests.get(url)
     data = r.json()
     data = data['Time Series (Daily)']
@@ -54,12 +54,12 @@ def update_data(Ticker, app, db, overwrite = False):
 
     with app.app_context():
         tickr_found = db.session.query(
-        db.session.query(stockData).filter_by(ticker="AAPL").exists()).scalar()
+        db.session.query(stockData).filter_by(ticker=ticker).exists()).scalar()
 
         if tickr_found and not overwrite:
             print("Data already exists")
         else:
-            DBobjects = convert_dict_to_objects(data, Ticker)
+            DBobjects = convert_dict_to_objects(data, ticker)
             db.session.bulk_save_objects(DBobjects)
 
         db.session.commit()
