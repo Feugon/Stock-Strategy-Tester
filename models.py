@@ -4,7 +4,7 @@ db = SQLAlchemy()
 
 
 class stockData(db.Model):
-    id = db.Column(db.Integer, primaryKey = True)
+    id = db.Column(db.Integer, primary_key = True)
     ticker = db.Column(db.String(10), nullable = False)
     date = db.Column(db.Date, nullable = False)
     low = db.Column(db.Float, nullable = False)
