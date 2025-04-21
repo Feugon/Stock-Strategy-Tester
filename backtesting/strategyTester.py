@@ -12,36 +12,33 @@ def test_strategy(data, strategy,  **kwargs):
     if strategy not in STRATEGY_MAP:
         raise ValueError(f"Strategy {strategy} not found.")
     
-    buy_dates, sell_dates = STRATEGY_MAP[strategy](data, **kwargs)
+    purchase_info, sell_info = STRATEGY_MAP[strategy](data, **kwargs)
     #TODO need support for kwargs, e.g. how much money we are starting with
     shares_owned = 0
     holdings_value = 0
-    cash_value = 0
+    cash_value = 100
     percent_returns = []
-    initial_portfolio_value = None
+    previous_portfolio_value = 100
 
-    # This does not work properly I think
     for index, entry in data.iterrows():
-        if entry['date'] in buy_dates:
-            shares_owned += 1    
-            cash_value -= entry['close']
-        elif entry['date'] in sell_dates:
-            shares_owned -= 1
-            cash_value += entry['close'] 
+        if entry['date'] in purchase_info.keys():
+            new_shares_amount = (cash_value * purchase_info[entry['date']]) / entry['close']
+            shares_owned += new_shares_amount
+            cash_value -= entry['close'] * new_shares_amount
+        elif entry['date'] in sell_info.keys():
+            new_shares_amount = (cash_value * sell_info[entry['date']]) / entry['close']
+            shares_owned -= new_shares_amount
+            cash_value += entry['close'] * new_shares_amount
         
         holdings_value = entry['close'] * shares_owned
-        portfolio_value = holdings_value + cash_value
-        
-        if initial_portfolio_value is None and portfolio_value != 0:
-            initial_portfolio_value = portfolio_value
-            percent_diff = (portfolio_value - initial_portfolio_value) / initial_portfolio_value
-            percent_returns.append(percent_diff)
-        elif initial_portfolio_value is None or portfolio_value == 0:
-            percent_returns.append(0)
-        
+        portfolio_value_today = holdings_value + cash_value
+        percent_returns.append((portfolio_value_today - previous_portfolio_value) / previous_portfolio_value)
+        previous_portfolio_value = portfolio_value_today
+
     sharpe = util.calculate_sharpe(percent_returns)
-    num_of_trades = len(buy_dates)
-    percent_gained = (holdings_value + cash_value - initial_portfolio_value) / initial_portfolio_value
+
+    num_of_trades = len(purchase_info)
+    percent_gained = (portfolio_value_today - 100)
 
     return util.StrategyResult(percent_gained,num_of_trades,percent_gained / num_of_trades, sharpe)
 

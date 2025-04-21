@@ -4,7 +4,7 @@ import backtesting.utilities as util
 
 def buy_and_hold(data):
     """ Return purhcase and sale dates for a buy and hold strategy"""
-    return [data['date'].iloc[0]],[data['date'].iloc[-1]] 
+    return {data['date'].iloc[0] : 1}, {data['date'].iloc[-1] : 1}
 
 
 # note to self: I'm changing it so the strategy summary gets printed in strategy tester
