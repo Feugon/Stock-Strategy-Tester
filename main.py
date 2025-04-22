@@ -26,6 +26,30 @@ def create_app(config = None):
     @app.route("/")
     def hello_world():
         return "<p>Hello, World!</p>"
+    
+    @app.route("/chart")
+    def chart():
+        return render_template('chart.html')
+        
+    @app.route("/chart-data")
+    def chart_data():
+        ticker = request.args.get('ticker', 'AAPL')
+        try:
+            df = fetch_data(app, ticker)
+            if df is None:
+                update_data(ticker, app, db)
+                df = fetch_data(app, ticker)
+     
+            if df is None:
+                return jsonify({'error': 'Failed to fetch data'}), 404
+
+            df['date'] = df['date'].astype(str)
+            data = df.to_dict('records')
+            
+            return jsonify(data)
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
     @app.route("/run-strategy", methods = ['GET', 'POST'])
     def run_strategy():
@@ -58,7 +82,7 @@ def create_app(config = None):
                 if df is None:
                     update_data(ticker, app, db)
                     df = fetch_data(app, ticker)
-                    
+
                 result = test_strategy(df, strategy, **kwargs)
                 return f"<h1>Strategy Results</h1><pre>{result}</pre><p><a href='/run-strategy'>Run Another Strategy</a></p>"
             except Exception as e:
