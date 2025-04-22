@@ -16,7 +16,6 @@ def test_strategy(data, strategy,  **kwargs):
     
     purchase_info, sell_info = STRATEGY_MAP[strategy](data, **kwargs)
     #TODO need support for kwargs, e.g. how much money we are starting with
-    print(purchase_info, sell_info)
     shares_owned = 0
     holdings_value = 0
     cash_value = 100
@@ -43,5 +42,5 @@ def test_strategy(data, strategy,  **kwargs):
     num_of_trades = len(purchase_info)
     percent_gained = round((portfolio_value_today - 100),3)
 
-    return util.StrategyResult(percent_gained,num_of_trades, round(percent_gained / num_of_trades,3), sharpe)
+    return util.StrategyResult(percent_gained,num_of_trades, round(percent_gained / num_of_trades,3), sharpe, purchase_info, sell_info)
 

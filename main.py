@@ -7,7 +7,9 @@ import pandas as pd
 from models import db
 from backtesting.strategyTester import test_strategy
 
-
+""" This is an idea, but we can define some global bool for if there was a strategy run, if so then in chart-data we add
+buy and sell dates as well, and modify the chart.js shit.
+After any route we set the bool back to false or maybe just after /chart-data we set it back to false."""
 
 def create_app(config = None):
     """Creates a Flask app.
@@ -25,11 +27,9 @@ def create_app(config = None):
 
     @app.route("/")
     def hello_world():
-        return "<p>Hello, World!</p>"
-    
-    @app.route("/chart")
-    def chart():
         return render_template('chart.html')
+   
+        
         
     @app.route("/chart-data")
     def chart_data():
@@ -50,6 +50,8 @@ def create_app(config = None):
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
+
+
 
     @app.route("/run-strategy", methods = ['GET', 'POST'])
     def run_strategy():
@@ -76,7 +78,7 @@ def create_app(config = None):
                     'jump_threshold': jump_threshold
                 }
             
-            # Fetch data and run strategy
+
             try:
                 df = fetch_data(app, ticker)
                 if df is None:
@@ -84,6 +86,7 @@ def create_app(config = None):
                     df = fetch_data(app, ticker)
 
                 result = test_strategy(df, strategy, **kwargs)
+
                 return f"<h1>Strategy Results</h1><pre>{result}</pre><p><a href='/run-strategy'>Run Another Strategy</a></p>"
             except Exception as e:
                 return f"<h1>Error</h1><p>{str(e)}</p><p><a href='/run-strategy'>Try Again</a></p>"
@@ -104,7 +107,6 @@ if __name__ == "__main__":
         db.create_all()
     
     df = fetch_data(app,'AAPL')
-    obj = test_strategy(df, 'SMA')
-    print(obj)
+
 
     app.run(debug = True)

@@ -6,10 +6,11 @@ import pandas as pd
 @dataclass
 class StrategyResult:
     total_return_pecent: float
-    # win_rate: float
     num_trades: int
     return_per_trade: float
     sharpe: float
+    buy_dates: list = None
+    sell_dates: list = None
 
 
 def calculate_sharpe(returns):
