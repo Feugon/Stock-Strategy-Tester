@@ -38,10 +38,10 @@ def test_strategy(data, strategy,  **kwargs):
         percent_returns.append((portfolio_value_today - previous_portfolio_value) / previous_portfolio_value)
         previous_portfolio_value = portfolio_value_today
 
-    sharpe = util.calculate_sharpe(percent_returns)
+    sharpe = round(util.calculate_sharpe(percent_returns),3)
 
     num_of_trades = len(purchase_info)
-    percent_gained = (portfolio_value_today - 100)
+    percent_gained = round((portfolio_value_today - 100),3)
 
-    return util.StrategyResult(percent_gained,num_of_trades,percent_gained / num_of_trades, sharpe)
+    return util.StrategyResult(percent_gained,num_of_trades, round(percent_gained / num_of_trades,3), sharpe)
 

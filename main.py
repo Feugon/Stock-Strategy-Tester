@@ -55,6 +55,10 @@ def create_app(config = None):
             # Fetch data and run strategy
             try:
                 df = fetch_data(app, ticker)
+                if df is None:
+                    update_data(ticker, app, db)
+                    df = fetch_data(app, ticker)
+                    
                 result = test_strategy(df, strategy, **kwargs)
                 return f"<h1>Strategy Results</h1><pre>{result}</pre><p><a href='/run-strategy'>Run Another Strategy</a></p>"
             except Exception as e:
