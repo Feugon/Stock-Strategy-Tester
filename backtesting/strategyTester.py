@@ -4,7 +4,8 @@ import backtesting.strategies as strat
 import backtesting.utilities as util
 
 STRATEGY_MAP = {
-    'buy and hold': strat.buy_and_hold
+    'buy and hold'  :   strat.buy_and_hold,
+    'SMA'           :   strat.simple_moving_average
 }
 
 def test_strategy(data, strategy,  **kwargs):
@@ -14,13 +15,14 @@ def test_strategy(data, strategy,  **kwargs):
     
     purchase_info, sell_info = STRATEGY_MAP[strategy](data, **kwargs)
     #TODO need support for kwargs, e.g. how much money we are starting with
+    print(purchase_info, sell_info)
     shares_owned = 0
     holdings_value = 0
     cash_value = 100
     percent_returns = []
     previous_portfolio_value = 100
 
-    for index, entry in data.iterrows():
+    for index, entry in data[::-1].iterrows():
         if entry['date'] in purchase_info.keys():
             new_shares_amount = (cash_value * purchase_info[entry['date']]) / entry['close']
             shares_owned += new_shares_amount

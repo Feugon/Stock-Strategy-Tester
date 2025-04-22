@@ -40,7 +40,7 @@ if __name__ == "__main__":
         db.create_all()
     
     df = fetch_data(app,'AAPL')
-    obj = test_strategy(df,'buy and hold')
+    obj = test_strategy(df, 'SMA')
     print(obj)
 
     #app.run(debug = True)
