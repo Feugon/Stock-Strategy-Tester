@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from configs import ProductionConfig, DevelopmentConfig
 from data.update import update_data
@@ -27,6 +27,42 @@ def create_app(config = None):
     def hello_world():
         return "<p>Hello, World!</p>"
 
+    @app.route("/run-strategy", methods = ['GET', 'POST'])
+    def run_strategy():
+        if request.method == 'POST':
+            print("Hello, Post Request Worked")
+            # Get form data
+            ticker = request.form.get('ticker')
+            strategy = request.form.get('strategy')
+            
+            # Get strategy-specific parameters
+            kwargs = {}
+            if strategy == 'SMA':
+                short_sma_interval = int(request.form.get('short_sma_interval', 10))
+                long_sma_interval = int(request.form.get('long_sma_interval', 30))
+                kwargs = {
+                    'short_sma_interval': short_sma_interval,
+                    'long_sma_interval': long_sma_interval
+                }
+            elif strategy == 'Momentum':
+                window = int(request.form.get('window', 20))
+                jump_threshold = float(request.form.get('jump_threshold', 5)) / 100  # Convert from percentage
+                kwargs = {
+                    'window': window,
+                    'jump_threshold': jump_threshold
+                }
+            
+            # Fetch data and run strategy
+            try:
+                df = fetch_data(app, ticker)
+                result = test_strategy(df, strategy, **kwargs)
+                return f"<h1>Strategy Results</h1><pre>{result}</pre><p><a href='/run-strategy'>Run Another Strategy</a></p>"
+            except Exception as e:
+                return f"<h1>Error</h1><p>{str(e)}</p><p><a href='/run-strategy'>Try Again</a></p>"
+        
+        # GET request - render the form template
+        return render_template('run_strategy.html')
+
     return app
 
 
@@ -43,4 +79,4 @@ if __name__ == "__main__":
     obj = test_strategy(df, 'SMA')
     print(obj)
 
-    #app.run(debug = True)
+    app.run(debug = True)

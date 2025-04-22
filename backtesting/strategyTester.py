@@ -5,7 +5,8 @@ import backtesting.utilities as util
 
 STRATEGY_MAP = {
     'buy and hold'  :   strat.buy_and_hold,
-    'SMA'           :   strat.simple_moving_average
+    'SMA'           :   strat.simple_moving_average,
+    'Momentum'      :   strat.momentum_swing
 }
 
 def test_strategy(data, strategy,  **kwargs):

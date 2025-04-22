@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Backtesting Strategy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .strategy-params {
+            display: none;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Run Backtesting Strategy</h1>
+    
+    <form action="/run-strategy" method="POST" id="strategy-form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="ticker">Stock Ticker:</label>
+            <input type="text" id="ticker" name="ticker" required placeholder="e.g. AAPL">
+        </div>
+        
+        <div class="form-group">
+            <label for="strategy">Strategy:</label>
+            <select id="strategy" name="strategy" required onchange="showStrategyParams()">
+                <option value="">Select a strategy</option>
+                <option value="buy and hold">Buy and Hold</option>
+                <option value="SMA">Simple Moving Average (SMA)</option>
+                <option value="Momentum">Momentum Swing</option>
+            </select>
+        </div>
+        
+        <!-- SMA Strategy Parameters -->
+        <div id="sma-params" class="strategy-params">
+            <div class="form-group">
+                <label for="short_sma_interval">Short SMA Interval:</label>
+                <input type="number" id="short_sma_interval" name="short_sma_interval" value="10" min="1">
+            </div>
+            <div class="form-group">
+                <label for="long_sma_interval">Long SMA Interval:</label>
+                <input type="number" id="long_sma_interval" name="long_sma_interval" value="30" min="1">
+            </div>
+        </div>
+        
+        <!-- Momentum Strategy Parameters -->
+        <div id="momentum-params" class="strategy-params">
+            <div class="form-group">
+                <label for="window">Window Size:</label>
+                <input type="number" id="window" name="window" value="20" min="1">
+            </div>
+            <div class="form-group">
+                <label for="jump_threshold">Jump Threshold (%):</label>
+                <input type="number" id="jump_threshold" name="jump_threshold" value="5" min="0" step="0.1">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <button type="submit">Run Strategy</button>
+        </div>
+    </form>
+
+    <script>
+        function showStrategyParams() {
+            // Hide all strategy parameter sections
+            document.querySelectorAll('.strategy-params').forEach(function(el) {
+                el.classList.remove('active');
+            });
+            
+            // Show the relevant section based on selected strategy
+            const strategy = document.getElementById('strategy').value;
+            if (strategy === 'SMA') {
+                document.getElementById('sma-params').classList.add('active');
+            } else if (strategy === 'Momentum') {
+                document.getElementById('momentum-params').classList.add('active');
+            }
+        }
+        
+        // Ensure the form submits as a regular POST request
+        document.getElementById('strategy-form').addEventListener('submit', function(event) {
+            // Don't prevent default - let the form submit normally
+            console.log('Form is being submitted');
+        });
+    </script>
+</body>
+</html>
