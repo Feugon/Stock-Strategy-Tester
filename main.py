@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from configs import ProductionConfig, DevelopmentConfig
 from data.update import update_data
@@ -6,6 +6,7 @@ from data.fetch import fetch_data
 import pandas as pd
 from models import db
 from backtesting.strategyTester import test_strategy
+
 
 """ This is an idea, but we can define some global bool for if there was a strategy run, if so then in chart-data we add
 buy and sell dates as well, and modify the chart.js shit.
@@ -45,8 +46,15 @@ def create_app(config = None):
 
             df['date'] = df['date'].astype(str)
             data = df.to_dict('records')
-            
-            return jsonify(data)
+            if session.get('stratHasRun', False):
+                session['stratHasRun'] = False
+
+                return jsonify({
+                    'prices' : data,
+                    'buy_dates' : session['strategyBuy'],
+                    'sell_dates' : session['strategySell']
+                }) 
+            return jsonify({'prices' : data})
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -78,16 +86,17 @@ def create_app(config = None):
                     'jump_threshold': jump_threshold
                 }
             
-
             try:
                 df = fetch_data(app, ticker)
                 if df is None:
                     update_data(ticker, app, db)
                     df = fetch_data(app, ticker)
 
-                result = test_strategy(df, strategy, **kwargs)
-
-                return f"<h1>Strategy Results</h1><pre>{result}</pre><p><a href='/run-strategy'>Run Another Strategy</a></p>"
+                strategy = test_strategy(df, strategy, **kwargs)
+                session['stratHasRun'] = True
+                session['strategyBuy'] = [str(d) for d in strategy.buy_dates]
+                session['strategySell'] = [str(d) for d in strategy.sell_dates]
+                return f"<h1>Strategy Results</h1><pre>{strategy}</pre><p><a href='/run-strategy'>Run Another Strategy</a></p>"
             except Exception as e:
                 return f"<h1>Error</h1><p>{str(e)}</p><p><a href='/run-strategy'>Try Again</a></p>"
         

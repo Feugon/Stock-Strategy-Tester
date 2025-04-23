@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -91,21 +92,45 @@
 
         function renderChart(data, ticker) {
             const ctx = document.getElementById('stockChart').getContext('2d');
-            
             // Destroy previous chart if it exists
             if (stockChart) {
                 stockChart.destroy();
             }
 
             // Format data for candlestick chart
-            const chartData = data.map(item => ({
+            const chartData = data.prices.map(item => ({
                 x: new Date(item.date),
                 o: item.open,
                 h: item.high,
                 l: item.low,
                 c: item.close
             }));
-
+              const buyMarkers = data?.buy_dates?.map(date => ({
+                  type: 'line',
+                  scaleID: 'x',
+                  borderColor: 'green',
+                  borderWidth: 2,
+                  value: date,
+                  label: {
+                    display: true,
+                    content: 'BUY',
+                    position: 'start',
+                    color: 'green'
+                  }
+                })) || [];
+              const sellMarkers = data?.sell_dates?.map(date => ({
+                type: 'line',
+                scaleID: 'x',
+                borderColor: 'red',
+                borderWidth: 2,
+                value: date,
+                label: {
+                  display: true,
+                  content: 'SELL',
+                  position: 'start',
+                  color: 'red'
+                }
+                })) || [];
             // Create new chart
             stockChart = new Chart(ctx, {
                 type: 'candlestick',
@@ -158,7 +183,10 @@
                         legend: {
                             display: false,
                             position: 'top'
-                        }
+                        },
+                        annotation: {
+                          annotations: [...buyMarkers, ... sellMarkers]
+                      }
                     }
                 }
             });
