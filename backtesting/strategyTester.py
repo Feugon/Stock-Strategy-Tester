@@ -9,20 +9,25 @@ STRATEGY_MAP = {
     'Momentum'      :   strat.momentum_swing
 }
 
-def test_strategy(data, strategy,  **kwargs):
+def run_strategy(strategy_name, stock_df, **kwargs):
+    if strategy_name not in STRATEGY_MAP:
+        raise ValueError(f"Strategy {strategy_name} not found.")
+
+    purchase_info, sell_info = STRATEGY_MAP[strategy_name](stock_df, **kwargs)
+    return purchase_info, sell_info
+
+
+def test_strategy(stock_df, strategy_name,  **kwargs):
     """Tests a strategy on a given dataset."""
-    if strategy not in STRATEGY_MAP:
-        raise ValueError(f"Strategy {strategy} not found.")
-    
-    purchase_info, sell_info = STRATEGY_MAP[strategy](data, **kwargs)
     #TODO need support for kwargs, e.g. how much money we are starting with
+    purchase_info, sell_info = run_strategy(strategy_name, stock_df, **kwargs)
     shares_owned = 0
     holdings_value = 0
     cash_value = 100
     percent_returns = []
     previous_portfolio_value = 100
 
-    for index, entry in data[::-1].iterrows():
+    for index, entry in stock_df[::-1].iterrows():
         if entry['date'] in purchase_info.keys():
             new_shares_amount = (cash_value * purchase_info[entry['date']]) / entry['close']
             shares_owned += new_shares_amount
@@ -31,7 +36,7 @@ def test_strategy(data, strategy,  **kwargs):
             new_shares_amount = (cash_value * sell_info[entry['date']]) / entry['close']
             shares_owned -= new_shares_amount
             cash_value += entry['close'] * new_shares_amount
-        
+
         holdings_value = entry['close'] * shares_owned
         portfolio_value_today = holdings_value + cash_value
         percent_returns.append((portfolio_value_today - previous_portfolio_value) / previous_portfolio_value)

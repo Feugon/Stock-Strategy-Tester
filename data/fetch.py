@@ -4,22 +4,19 @@ from flask import Flask
 
 
 
-def fetch_data(app, ticker):
+def fetch_data(flask_app_instance, ticker):
     """Fetches data from the database.
     Args:
-        app (Flask): Flask app
+        flask_app_instance (Flask): Flask app
         ticker (str): Ticker symbol
     Returns:
         df (pd.DataFrame): Dataframe containing the data
     """
-    with app.app_context():
-        test = stockData.query.filter_by(ticker = ticker).first()
-        if test is None:
+    with flask_app_instance.app_context():
+        stock_entries = stockData.query.filter_by(ticker=ticker).all()
+        if not stock_entries:
             return None
 
-
-        result = stockData.query.filter_by(ticker=ticker).all()
-        df = pd.DataFrame([r.__dict__ for r in result])
-        df = df.drop(columns=['_sa_instance_state', 'id','ticker'])
-
+        df = pd.DataFrame([entry.__dict__ for entry in stock_entries])
+        df = df.drop(columns=['_sa_instance_state', 'id', 'ticker'])
     return df

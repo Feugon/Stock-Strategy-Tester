@@ -5,7 +5,7 @@ import pandas as pd
 
 @dataclass
 class StrategyResult:
-    total_return_pecent: float
+    total_return_percent: float
     num_trades: int
     return_per_trade: float
     sharpe: float
@@ -13,12 +13,12 @@ class StrategyResult:
     sell_dates: list = None
 
 
-def calculate_sharpe(returns):
+def calculate_sharpe(daily_percent_profit):
     """ Calculate the sharpe ratio of a given return np.array"""
-    return round(np.sqrt(252) * np.mean(returns) / np.std(returns),3)
+    return round(np.sqrt(252) * np.mean(daily_percent_profit) / np.std(daily_percent_profit),3)
 
-def calculate_sma(prices, timeframe):
+def calculate_sma(stock_prices, sma_timeframe):
     """ Calculate the SMA usen given prices and for the amount of days specifed"""
-    return prices.rolling(window = timeframe).mean()
+    return stock_prices.rolling(window = sma_timeframe).mean()
 
 
