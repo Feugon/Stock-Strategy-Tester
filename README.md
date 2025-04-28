@@ -24,8 +24,11 @@ It's a simple tool to quickly explore how different strategies would have perfor
 - Backtest trading strategies and view summarized results.
 - Simple UI to input stock tickers and select strategies.
 
-## Example Page
-<img width="1728" alt="image" src="https://github.com/user-attachments/assets/398929eb-2c44-4976-86f1-62bc5959be1b" />
+## Example Pages
+<img width="1725" alt="image" src="https://github.com/user-attachments/assets/0fb4be64-a96a-4efd-bade-6111aaf432d0" />
+
+<img width="1725" alt="image" src="https://github.com/user-attachments/assets/c3053aa1-3a02-4cb3-a560-34dd9c0816a0" />
+
 
 
 ## Getting Started
