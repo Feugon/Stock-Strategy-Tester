@@ -17,6 +17,7 @@ It shows interactive candlestick charts and strategy results, making it easier t
 - Simple UI to input stock tickers and select strategies.
 
 ## Example Page
+<img width="1728" alt="image" src="https://github.com/user-attachments/assets/398929eb-2c44-4976-86f1-62bc5959be1b" />
 
 
 ## Getting Started
