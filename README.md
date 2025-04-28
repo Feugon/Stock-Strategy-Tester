@@ -1,9 +1,17 @@
 # Investing Backtracker
 
-## Project Overview
-**Investing Backtracker** is a web app that lets you visualize stock data and backtest trading strategies.  
-It shows interactive candlestick charts and strategy results, making it easier to analyze stock performance and explore different trading ideas.
+## Motivation
+I built Investing Backtracker to get some practice with Flask, using APIs, and displaying data with Chart.js.  
+Along the way, I learned how to pull in stock data, set up a basic backend, and make simple interactive charts. It also helped me get a bit more comfortable with handling environment variables and building a basic web app from scratch.
 
+## What It Does
+Investing Backtracker lets you:
+- Type in a stock ticker.
+- See an interactive candlestick chart of the stock's historical data.
+- Choose a trading strategy and backtest it on that stock.
+- View basic results like total return and number of trades.
+
+It's a simple tool to quickly explore how different strategies would have performed.
 ## Technologies Used
 - **Flask** — lightweight backend framework.
 - **Chart.js** — library for dynamic, interactive charts.
