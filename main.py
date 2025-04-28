@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from configs import ProductionConfig, DevelopmentConfig
 from data.update import update_data
@@ -28,7 +28,9 @@ def create_app(config = None):
 
     @app.route("/")
     def hello_world():
-        return render_template('chart.html')
+        ticker = request.args.get('ticker', 'AAPL')
+        strategy_info = session.pop('strategy_info', None)
+        return render_template('chart.html', ticker=ticker, strategy_info=strategy_info)
    
         
         
@@ -85,6 +87,13 @@ def create_app(config = None):
                     'window': window,
                     'jump_threshold': jump_threshold
                 }
+            elif strategy == 'MeanReversion':
+                window = int(request.form.get('window', 20))
+                threshold = float(request.form.get('threshold', 2)) / 100  # Convert from percentage
+                kwargs = {
+                    'window': window,
+                    'threshold': threshold
+                }
             
             try:
                 df = fetch_data(app, ticker)
@@ -96,7 +105,21 @@ def create_app(config = None):
                 session['stratHasRun'] = True
                 session['strategyBuy'] = [str(d) for d in strategy.buy_dates]
                 session['strategySell'] = [str(d) for d in strategy.sell_dates]
-                return f"<h1>Strategy Results</h1><pre>{strategy}</pre><p><a href='/run-strategy'>Run Another Strategy</a></p>"
+                # Format strategy summary as a user-friendly string
+                if hasattr(strategy, 'total_return_percent') and hasattr(strategy, 'num_trades') and hasattr(strategy, 'return_per_trade') and hasattr(strategy, 'sharpe'):
+                    summary = f"Total return: {getattr(strategy, 'total_return_percent', 0):.2f}%. Number of trades: {getattr(strategy, 'num_trades', 0)}. Return per trade: {getattr(strategy, 'return_per_trade', 0):.2f}%. Sharpe ratio: {getattr(strategy, 'sharpe', 0):.2f}."
+                else:
+                    summary = str(strategy)
+                session['strategy_info'] = {
+                    'total_return_percent': getattr(strategy, 'total_return_percent', 0),
+                    'num_trades': getattr(strategy, 'num_trades', 0),
+                    'return_per_trade': getattr(strategy, 'return_per_trade', 0),
+                    'sharpe': getattr(strategy, 'sharpe', 0),
+                    'buy_dates': session['strategyBuy'],
+                    'sell_dates': session['strategySell']
+                }
+                # Redirect to chart page with the ticker to visualize the strategy results
+                return redirect(url_for('hello_world', ticker=ticker))
             except Exception as e:
                 return f"<h1>Error</h1><p>{str(e)}</p><p><a href='/run-strategy'>Try Again</a></p>"
         

@@ -49,6 +49,24 @@
 </head>
 <body>
     <h1>Stock Chart</h1>
+    {% if strategy_info %}
+    <div id="strategy-info" style="background:#f3f3f3;border:1px solid #ccc;padding:15px;margin-bottom:20px;border-radius:8px;max-width:400px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <strong style="font-size:1.2em;">Strategy Results</strong>
+        {% set info = strategy_info if strategy_info is mapping else None %}
+        {% if info %}
+            <table style="width:100%;margin-top:10px;border-collapse:collapse;">
+                <tr><td style="font-weight:bold;padding:4px 8px;">Total Return:</td><td style="padding:4px 8px;">{{ info.total_return_percent|round(2) }}%</td></tr>
+                <tr><td style="font-weight:bold;padding:4px 8px;">Number of Trades:</td><td style="padding:4px 8px;">{{ info.num_trades }}</td></tr>
+                <tr><td style="font-weight:bold;padding:4px 8px;">Return per Trade:</td><td style="padding:4px 8px;">{{ info.return_per_trade|round(2) }}%</td></tr>
+                <tr><td style="font-weight:bold;padding:4px 8px;">Sharpe Ratio:</td><td style="padding:4px 8px;">{{ info.sharpe }}</td></tr>
+                <tr><td style="font-weight:bold;padding:4px 8px;">Buy Dates:</td><td style="padding:4px 8px;">{{ info.buy_dates|join(', ') }}</td></tr>
+                <tr><td style="font-weight:bold;padding:4px 8px;">Sell Dates:</td><td style="padding:4px 8px;">{{ info.sell_dates|join(', ') }}</td></tr>
+            </table>
+        {% else %}
+            <div style="margin-top:10px;white-space:pre-line;">{{ strategy_info|safe }}</div>
+        {% endif %}
+    </div>
+    {% endif %}
     
     <div class="form-group">
         <label for="ticker-input">Stock Ticker:</label>
@@ -66,13 +84,25 @@
 
     <script>
         let stockChart = null;
+        
+        // Get ticker from URL parameter if available
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
 
         function loadChart() {
-            const ticker = document.getElementById('ticker-input').value.trim().toUpperCase();
+            const inputTicker = document.getElementById('ticker-input').value.trim().toUpperCase();
+            const ticker = inputTicker || getUrlParameter('ticker');
             if (!ticker) {
                 alert('Please enter a valid ticker symbol');
                 return;
             }
+            
+            // Update input field with current ticker
+            document.getElementById('ticker-input').value = ticker;
 
             fetch(`/chart-data?ticker=${ticker}`)
                 .then(response => {
@@ -112,10 +142,7 @@
                   borderWidth: 2,
                   value: date,
                   label: {
-                    display: true,
-                    content: 'BUY',
-                    position: 'start',
-                    color: 'green'
+                    display: false
                   }
                 })) || [];
               const sellMarkers = data?.sell_dates?.map(date => ({
@@ -125,10 +152,7 @@
                 borderWidth: 2,
                 value: date,
                 label: {
-                  display: true,
-                  content: 'SELL',
-                  position: 'start',
-                  color: 'red'
+                  display: false
                 }
                 })) || [];
             // Create new chart
@@ -148,10 +172,17 @@
                         x: {
                             type: 'time',
                             time: {
-                                unit: 'day',
+                                unit: 'day', // Or 'month', 'year' depending on data span
+                                tooltipFormat: 'MMM d, yyyy',
                                 displayFormats: {
-                                    day: 'MMM d'
+                                    day: 'MMM d',
+                                    month: 'MMM yyyy',
+                                    year: 'yyyy'
                                 }
+                            },
+                            ticks: {
+                                source: 'auto', // Automatically determine ticks based on data
+                                maxTicksLimit: 15 // Adjust this number as needed for density
                             },
                             title: {
                                 display: true,
@@ -191,6 +222,14 @@
                 }
             });
         }
+        // Load chart automatically when page loads with ticker from URL
+        window.onload = function() {
+            const urlTicker = getUrlParameter('ticker');
+            if (urlTicker) {
+                document.getElementById('ticker-input').value = urlTicker;
+                loadChart();
+            }
+        };
     </script>
 </body>
 </html>
